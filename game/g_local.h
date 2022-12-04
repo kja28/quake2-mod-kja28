@@ -862,6 +862,8 @@ typedef struct
 	int			helpchanged;
 
 	qboolean	spectator;			// client is a spectator
+	
+
 } client_persistant_t;
 
 // client data that stays across deathmatch respawns
@@ -873,6 +875,8 @@ typedef struct
 	vec3_t		cmd_angles;			// angles sent over in the last command
 
 	qboolean	spectator;			// client is a spectator
+
+	int         pClass;             //KA edit: used to determine which class player chooses
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),

@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include "g_local.h"
 #include "m_player.h"
+#include "p_class.h"  // KA edit
 
 void ClientUserinfoChanged (edict_t *ent, char *userinfo);
 
@@ -1586,6 +1587,9 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			level.exitintermission = true;
 		return;
 	}
+
+	//KA edit: Constantly check for what class the player is
+	CheckClass(ent);
 
 	pm_passent = ent;
 
