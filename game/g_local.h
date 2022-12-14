@@ -877,6 +877,9 @@ typedef struct
 	qboolean	spectator;			// client is a spectator
 
 	int         pClass;             //KA edit: used to determine which class player chooses
+	int         pTime;              //KA edit: used for isInv function
+	qboolean    isInvi;             //KA edit: used for isInv function
+	qboolean    isCont;            //KA edit: used for MindControl
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),
@@ -1014,7 +1017,8 @@ struct edict_s
 
 	float		timestamp;
 
-	float		angle;			// set in qe3, -1 = up, -2 = down
+
+	float		angle;// set in qe3, -1 = up, -2 = down
 	char		*target;
 	char		*targetname;
 	char		*killtarget;

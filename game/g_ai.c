@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // g_ai.c
 
 #include "g_local.h"
+#include "p_class.h"
 
 qboolean FindTarget (edict_t *self);
 extern cvar_t	*maxclients;
@@ -407,6 +408,7 @@ slower noticing monsters.
 qboolean FindTarget (edict_t *self)
 {
 	edict_t		*client;
+	edict_t     *target;
 	qboolean	heardit;
 	int			r;
 
@@ -421,7 +423,6 @@ qboolean FindTarget (edict_t *self)
 		//FIXME look for monsters?
 		return false;
 	}
-
 	// if we're going to a combat point, just proceed
 	if (self->monsterinfo.aiflags & AI_COMBAT_POINT)
 		return false;

@@ -335,10 +335,15 @@ void berserk_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 void berserk_dead (edict_t *self)
 {
+	gitem_t* it;//KA edit
+	edict_t* it_ent;
+
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, -8);
 	self->movetype = MOVETYPE_TOSS;
 	self->svflags |= SVF_DEADMONSTER;
+	it_ent = Drop_Item(self, FindItemByClassname("item_quad")); //KA edit
+	
 	self->nextthink = 0;
 	gi.linkentity (self);
 }
@@ -381,6 +386,8 @@ mmove_t berserk_move_death2 = {FRAME_deathc1, FRAME_deathc8, berserk_frames_deat
 void berserk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
+	gitem_t* it;// KA edit
+	edict_t* it_ent;
 
 	if (self->health <= self->gib_health)
 	{
@@ -393,6 +400,8 @@ void berserk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 		self->deadflag = DEAD_DEAD;
 		return;
 	}
+
+	it_ent = Drop_Item(self, FindItemByClassname("item_quad")); //KA edit
 
 	if (self->deadflag == DEAD_DEAD)
 		return;

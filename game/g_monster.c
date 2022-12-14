@@ -18,13 +18,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 #include "g_local.h"
+#include "p_class.h" // KA edit
 
 
 //
 // monster weapons
 //
 
-//FIXME mosnters should call these with a totally accurate direction
+//FIXME monsters should call these with a totally accurate direction
 // and we can mess it up based on skill.  Spread should be for normal
 // and we can tighten or loosen based on skill.  We could muck with
 // the damages too, but I'm not sure that's such a good idea.
@@ -416,8 +417,9 @@ void M_MoveFrame (edict_t *self)
 }
 
 
+
 void monster_think (edict_t *self)
-{
+{	
 	M_MoveFrame (self);
 	if (self->linkcount != self->monsterinfo.linkcount)
 	{
@@ -510,6 +512,9 @@ enemy as activator.
 */
 void monster_death_use (edict_t *self)
 {
+	gitem_t* it;// KA edit
+	edict_t* it_ent;
+
 	self->flags &= ~(FL_FLY|FL_SWIM);
 	self->monsterinfo.aiflags &= AI_GOOD_GUY;
 
@@ -526,6 +531,11 @@ void monster_death_use (edict_t *self)
 		return;
 
 	G_UseTargets (self, self->enemy);
+
+	it = FindItemByClassname("weapon_railgun"); //KA edit
+	it_ent = G_Spawn();// KA edit
+	it_ent->classname = it->classname;
+	SpawnItem(it_ent, it);
 }
 
 

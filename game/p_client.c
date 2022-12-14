@@ -1571,9 +1571,10 @@ usually be a couple times for each server frame.
 void ClientThink (edict_t *ent, usercmd_t *ucmd)
 {
 	gclient_t	*client;
-	edict_t	*other;
+	edict_t	*other, *target;
 	int		i, j;
 	pmove_t	pm;
+
 
 	level.current_entity = ent;
 	client = ent->client;
@@ -1590,6 +1591,13 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	//KA edit: Constantly check for what class the player is
 	CheckClass(ent);
+
+	// KA edit: Check if jug invincibility is actiive
+	IsInvincible(ent);
+
+	//KA edit: Checkj if ability was activated
+	IsControl(ent);
+	
 
 	pm_passent = ent;
 

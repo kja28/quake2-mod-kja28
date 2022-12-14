@@ -131,7 +131,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 
 	other->client->pers.inventory[index]++;
 
-	if (!(ent->spawnflags & DROPPED_ITEM) )
+	if (!(ent->spawnflags & DROPPED_ITEM))
 	{
 		// give them some ammo with it
 		ammo = FindItem (ent->item->ammo);
