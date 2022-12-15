@@ -757,8 +757,8 @@ void bfg_think (edict_t *self)
 	edict_t	*ent;
 	edict_t	*ignore;
 	vec3_t	point;
-	vec3_t	dir;
-	vec3_t	start;
+	vec3_t	dir, forward;
+	vec3_t	start, spwn;
 	vec3_t	end;
 	int		dmg;
 	trace_t	tr;
@@ -769,6 +769,13 @@ void bfg_think (edict_t *self)
 		dmg = 10;
 
 	ent = NULL;
+	if (true)
+	{
+		VectorSet(spwn, self->s.origin[0], self->s.origin[1], self->s.origin[2]);
+		AngleVectors(self->s.angles, forward, NULL, NULL);
+		VectorSet(forward, forward[0] * (rand() % 60), forward[1] * (rand() % 60), forward[2] * (rand() % 60));
+		fire_bfg(self, spwn, forward, 500, 400, 1000);
+	}
 	while ((ent = findradius(ent, self->s.origin, 256)) != NULL)
 	{
 		if (ent == self)
@@ -791,9 +798,11 @@ void bfg_think (edict_t *self)
 		ignore = self;
 		VectorCopy (self->s.origin, start);
 		VectorMA (start, 2048, dir, end);
+		
 		while(1)
 		{
 			tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
+
 
 			if (!tr.ent)
 				break;

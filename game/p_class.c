@@ -70,6 +70,22 @@ static void P_ProjectSource(gclient_t* client, vec3_t point, vec3_t distance, ve
 		_distance[1] = 0;
 	G_ProjectSource(point, _distance, forward, right, result);
 }
+static void drop_temp_touch(edict_t* ent, edict_t* other, cplane_t* plane, csurface_t* surf)
+{
+	if (other == ent->owner)
+		return;
+
+	Touch_Item(ent, other, plane, surf);
+}
+static void drop_make_touchable(edict_t* ent)
+{
+	ent->touch = Touch_Item;
+	if (deathmatch->value)
+	{
+		ent->nextthink = level.time + 29;
+		ent->think = G_FreeEdict;
+	}
+}
 
 
 // Check if the player has a class yet. If they don't tell them how to pick one
@@ -112,7 +128,7 @@ void Cmd_Class_f(edict_t* ent, char* cmd)
 		ent->client->resp.pClass = 4;
 		ent->client->pers.max_health = 75;
 		ent->health = 75;
-		gi.centerprintf(ent, "Assassin\n");
+		gi.centerprintf(ent, "Gun Mage\n");
 	}
 	else if (Q_stricmp(cmd, "madman") == 0)
 	{
@@ -215,20 +231,21 @@ void Cmd_Ability_f(edict_t* ent)
 			ent->client->quad_framenum = level.framenum + timeout;
 	
 	}
-	if (ent->client->resp.pClass == 4) // Assassin
+	if (ent->client->resp.pClass == 4) // Assassin(Now Gun Mage)
 	{
-		gitem_t* it;// KA edit
+		gitem_t* item;// KA edit
+		char* it = RandomWeapon();
+		gitem_t *ammo;
 		edict_t* it_ent;
 
-		it = FindItemByClassname("weapon_railgun");
-		it_ent = G_Spawn();
-		it_ent->s.origin[0] = ent->s.origin[0];
-		it_ent->s.origin[1] = ent->s.origin[1];
-		it_ent->s.origin[2] = ent->s.origin[2];
-		it_ent->classname = it->classname;
-		SpawnItem(it_ent, it);
-		gi.linkentity(it_ent);
+		item = FindItemByClassname(it);
+
+		if ((int)(dmflags->value) & DF_WEAPONS_STAY)
+			return;
 		
+		it_ent = Drop_Item(ent, item);
+		ammo = FindItem(it_ent->item->ammo);
+		Add_Ammo(ent, ammo, 1000);
 	}
 	if (ent->client->resp.pClass == 5)// Madman
 	{
@@ -254,4 +271,30 @@ void Cmd_Ability_f(edict_t* ent)
 	}
 }
 
+qboolean RandomCheck()
+{
+	int chk;
+	
+	chk = rand() % 100;
+	if (chk > 30)
+		return true;
+	else
+		return false;
+}
+
+char* RandomWeapon()
+{
+	char rs[9][30] = {
+		"weapon_shotgun",
+		"weapon_supershotgun",
+		"weapon_machinegun",
+		"weapon_chaingun",
+		"weapon_grenadelauncher",
+		"weapon_rocketlauncher",
+		"weapon_hyperblaster",
+		"weapon_railgun",
+		"weapon_bfg" };
+
+	return rs[(rand() % 8)];
+}
 

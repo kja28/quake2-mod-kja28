@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "g_local.h"
 #include "m_player.h"
+#include "p_class.h"
 
 
 static qboolean	is_quad;
@@ -360,8 +361,26 @@ void Drop_Weapon (edict_t *ent, gitem_t *item)
 		gi.cprintf (ent, PRINT_HIGH, "Can't drop current weapon\n");
 		return;
 	}
+	if (item->classname == "weapon_grenadelauncher")
+	{
+		vec3_t	offset;
+		vec3_t	forward, right;
+		vec3_t	start;
+		int		damage = 120;
+		float	radius;
 
-	Drop_Item (ent, item);
+		radius = damage + 40;
+		VectorSet(offset, 8, 8, ent->viewheight - 8);
+		AngleVectors(ent->client->v_angle, forward, right, NULL);
+		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+		VectorScale(forward, -2, ent->client->kick_origin);
+		fire_grenade(ent, start, forward, damage, 600, 2.5, radius);
+		
+	}
+	else
+	{
+		Drop_Item(ent, item);
+	}
 	ent->client->pers.inventory[index]--;
 }
 
@@ -763,7 +782,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	int		damage;
 	float	damage_radius;
 	int		radius_damage;
-
+	int i = 0;
 	damage = 100 + (int)(random() * 20.0);
 	radius_damage = 120;
 	damage_radius = 120;
@@ -780,7 +799,15 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_rocket (ent, start, forward, damage, 650, damage_radius, radius_damage);
+
+	fire_rocket(ent, start, forward, damage, 650, damage_radius, radius_damage);
+	fire_rocket(ent, start, forward, damage, 650, damage_radius, radius_damage);
+	fire_rocket(ent, start, forward, damage, 650, damage_radius, radius_damage);
+	fire_rocket(ent, start, forward, damage, 650, damage_radius, radius_damage);
+	fire_rocket(ent, start, forward, damage, 650, damage_radius, radius_damage);
+	fire_rocket(ent, start, forward, damage, 650, damage_radius, radius_damage);
+
+	
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -799,9 +826,9 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 void Weapon_RocketLauncher (edict_t *ent)
 {
 	static int	pause_frames[]	= {25, 33, 42, 50, 0};
-	static int	fire_frames[]	= {5, 0};
+	static int	fire_frames[]	= {5, 10, 15, 0};
 
-	Weapon_Generic (ent, 4, 12, 50, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
+	Weapon_Generic (ent, 4, 16, 50, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
 }
 
 
@@ -962,7 +989,7 @@ void Machinegun_Fire (edict_t *ent)
 
 	if (!(ent->client->buttons & BUTTON_ATTACK))
 	{
-		ent->client->machinegun_shots = 0;
+		ent->client->machinegun_shots = 1;
 		ent->client->ps.gunframe++;
 		return;
 	}
@@ -990,20 +1017,21 @@ void Machinegun_Fire (edict_t *ent)
 		kick *= 4;
 	}
 
+
+
 	for (i=1 ; i<3 ; i++)
 	{
-		ent->client->kick_origin[i] = crandom() * 0.35;
-		ent->client->kick_angles[i] = crandom() * 0.7;
+		ent->client->kick_origin[i] = (crandom() * .25);
+		ent->client->kick_angles[i] = (crandom() * .25);
 	}
-	ent->client->kick_origin[0] = crandom() * 0.35;
-	ent->client->kick_angles[0] = ent->client->machinegun_shots * -1.5;
+
 
 	// raise the gun as it is firing
 	if (!deathmatch->value)
 	{
 		ent->client->machinegun_shots++;
-		if (ent->client->machinegun_shots > 9)
-			ent->client->machinegun_shots = 9;
+		if (ent->client->machinegun_shots > 20000)
+			ent->client->machinegun_shots = 20000;
 	}
 
 	// get start / end positions
@@ -1011,7 +1039,7 @@ void Machinegun_Fire (edict_t *ent)
 	AngleVectors (angles, forward, right, NULL);
 	VectorSet(offset, 0, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_bullet (ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
+	fire_bullet (ent, start, forward, damage, kick, (3000 / ent->client->machinegun_shots), (5000 / ent->client->machinegun_shots), MOD_MACHINEGUN);
 
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1133,6 +1161,9 @@ void Chaingun_Fire (edict_t *ent)
 		kick *= 4;
 	}
 
+	if (ent->client->ps.gunframe <= 20)
+		return;
+
 	for (i=0 ; i<3 ; i++)
 	{
 		ent->client->kick_origin[i] = crandom() * 0.35;
@@ -1148,7 +1179,7 @@ void Chaingun_Fire (edict_t *ent)
 		VectorSet(offset, 0, r, u + ent->viewheight-8);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-		fire_bullet (ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
+		fire_shotgun(ent, start, forward, damage, kick, 500, 500, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
 	}
 
 	// send muzzle flash
@@ -1167,9 +1198,9 @@ void Chaingun_Fire (edict_t *ent)
 void Weapon_Chaingun (edict_t *ent)
 {
 	static int	pause_frames[]	= {38, 43, 51, 61, 0};
-	static int	fire_frames[]	= {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0};
+	static int	fire_frames[]	= {20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 0};
 
-	Weapon_Generic (ent, 4, 31, 61, 64, pause_frames, fire_frames, Chaingun_Fire);
+	Weapon_Generic (ent, 4, 51, 61, 64, pause_frames, fire_frames, Chaingun_Fire);
 }
 
 
@@ -1232,7 +1263,7 @@ void Weapon_Shotgun (edict_t *ent)
 	static int	pause_frames[]	= {22, 28, 34, 0};
 	static int	fire_frames[]	= {8, 9, 0};
 
-	Weapon_Generic (ent, 7, 18, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
+	Weapon_Generic (ent, 7, 8, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
 }
 
 
@@ -1286,7 +1317,7 @@ void Weapon_SuperShotgun (edict_t *ent)
 	static int	pause_frames[]	= {29, 42, 57, 0};
 	static int	fire_frames[]	= {7, 0};
 
-	Weapon_Generic (ent, 6, 17, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
+	Weapon_Generic (ent, 6, 7, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
 }
 
 
@@ -1314,8 +1345,16 @@ void weapon_railgun_fire (edict_t *ent)
 	}
 	else
 	{
-		damage = 150;
-		kick = 250;
+		if (RandomCheck())
+		{
+			damage = 20;
+			kick = 20;
+		}
+		else
+		{
+			damage = 150;
+			kick = 250;
+		}
 	}
 
 	if (is_quad)
@@ -1324,12 +1363,19 @@ void weapon_railgun_fire (edict_t *ent)
 		kick *= 4;
 	}
 
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
+
+	AngleVectors(ent->client->v_angle, forward, right, NULL);
+
 
 	VectorScale (forward, -3, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -3;
 
 	VectorSet(offset, 0, 7,  ent->viewheight-8);
+	if (RandomCheck())
+	{
+		VectorSet(forward, forward[0] * (rand() % 50), forward[1] * (rand() % 50), forward[2] * (rand() % 50));
+		VectorSet(right, right[0] * (rand() % 50), right[1] * (rand() % 50), right[2] * (rand() % 50));
+	}
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 	fire_rail (ent, start, forward, damage, kick);
 
