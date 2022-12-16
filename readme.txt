@@ -5,7 +5,7 @@ Assassin becomes invisible.
 Each time you kill an enemy they will drop random weapons with random stats. 
 
 Some enemies are designed to behave motre like borderlands enemies.  Some will dodge more (bandits), some will just try to melee you (psychos),  
-some will charge you really fast (principal gueardians), some will shoot a beam at you ( sera guardian), and some will spit acid (varkids).
+some will charge you really fast (principal guardians), some will shoot a beam at you ( sera guardian), and some will spit acid (varkids).
 
 The way weapons behave 
 
@@ -24,3 +24,7 @@ bfg = spawns clones of itself as it travels (similar to some powerful rocket lau
 machineggun = gain precision while holding fire (Hyperion)
 
 chaingun = has to charge up before it can fire (Vladof)
+
+
+Just need to install all the files here and but the entire boderquake file into quake 2's files (the same folder or directory with baseq2) 
+you can make a shortcut that links to the borderquake folder (included in files) or take the game x86.dll and put it into base q2 but the shortcut link is recommended.
