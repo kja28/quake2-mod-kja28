@@ -27,6 +27,7 @@ SOLDIER
 
 #include "g_local.h"
 #include "m_soldier.h"
+#include "p_class.h"
 
 
 static int	sound_idle;
@@ -829,39 +830,10 @@ void soldier_dodge (edict_t *self, edict_t *attacker, float eta)
 {
 	float	r;
 
-	r = random();
-	if (r > 0.25)
-		return;
 
 	if (!self->enemy)
 		self->enemy = attacker;
 
-	if (skill->value == 0)
-	{
-		self->monsterinfo.currentmove = &soldier_move_duck;
-		return;
-	}
-
-	self->monsterinfo.pausetime = level.time + eta + 0.3;
-	r = random();
-
-	if (skill->value == 1)
-	{
-		if (r > 0.33)
-			self->monsterinfo.currentmove = &soldier_move_duck;
-		else
-			self->monsterinfo.currentmove = &soldier_move_attack3;
-		return;
-	}
-
-	if (skill->value >= 2)
-	{
-		if (r > 0.66)
-			self->monsterinfo.currentmove = &soldier_move_duck;
-		else
-			self->monsterinfo.currentmove = &soldier_move_attack3;
-		return;
-	}
 
 	self->monsterinfo.currentmove = &soldier_move_attack3;
 }
@@ -1144,7 +1116,93 @@ mmove_t soldier_move_death6 = {FRAME_death601, FRAME_death610, soldier_frames_de
 void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
+	gitem_t* it;// KA edit
+	edict_t* it_ent;
+	int r;
 
+	r = rand() % 9;
+
+	if (r == 1)
+	{
+		it = FindItemByClassname("weapon_shotgun"); //KA edit
+		it_ent = G_Spawn();// KA edit
+		it_ent->classname = it->classname;
+		SpawnItem(it_ent, it);
+		VectorSet(it_ent->s.origin, self->s.origin[0], self->s.origin[1], self->s.origin[2]);
+		gi.linkentity(it_ent);
+	}
+	else if (r == 2)
+	{
+		it = FindItemByClassname("weapon_supershotgun"); //KA edit
+		it_ent = G_Spawn();// KA edit
+		it_ent->classname = it->classname;
+		SpawnItem(it_ent, it);
+		VectorSet(it_ent->s.origin, self->s.origin[0], self->s.origin[1], self->s.origin[2]);
+		gi.linkentity(it_ent);
+	}
+	else if (r == 3)
+	{
+		it = FindItemByClassname("weapon_machinegun"); //KA edit
+		it_ent = G_Spawn();// KA edit
+		it_ent->classname = it->classname;
+		SpawnItem(it_ent, it);
+		VectorSet(it_ent->s.origin, self->s.origin[0], self->s.origin[1], self->s.origin[2]);
+		gi.linkentity(it_ent);
+	}
+	else if (r == 4)
+	{
+		it = FindItemByClassname("weapon_chaingun"); //KA edit
+		it_ent = G_Spawn();// KA edit
+		it_ent->classname = it->classname;
+		SpawnItem(it_ent, it);
+		VectorSet(it_ent->s.origin, self->s.origin[0], self->s.origin[1], self->s.origin[2]);
+		gi.linkentity(it_ent);
+	}
+	else if (r == 5)
+	{
+		it = FindItemByClassname("weapon_railgun"); //KA edit
+		it_ent = G_Spawn();// KA edit
+		it_ent->classname = it->classname;
+		SpawnItem(it_ent, it);
+		VectorSet(it_ent->s.origin, self->s.origin[0], self->s.origin[1], self->s.origin[2]);
+		gi.linkentity(it_ent);
+	}
+	else if (r == 6)
+	{
+		it = FindItemByClassname("weapon_grenadelauncher"); //KA edit
+		it_ent = G_Spawn();// KA edit
+		it_ent->classname = it->classname;
+		SpawnItem(it_ent, it);
+		VectorSet(it_ent->s.origin, self->s.origin[0], self->s.origin[1], self->s.origin[2]);
+		gi.linkentity(it_ent);
+	}
+	else if (r == 7)
+	{
+		it = FindItemByClassname("weapon_rocketlauncher"); //KA edit
+		it_ent = G_Spawn();// KA edit
+		it_ent->classname = it->classname;
+		SpawnItem(it_ent, it);
+		VectorSet(it_ent->s.origin, self->s.origin[0], self->s.origin[1], self->s.origin[2]);
+		gi.linkentity(it_ent);
+	}
+	else if (r == 8)
+	{
+		it = FindItemByClassname("weapon_bfg"); //KA edit
+		it_ent = G_Spawn();// KA edit
+		it_ent->classname = it->classname;
+		SpawnItem(it_ent, it);
+		VectorSet(it_ent->s.origin, self->s.origin[0], self->s.origin[1], self->s.origin[2]);
+		gi.linkentity(it_ent);
+	}
+	else if (r == 9)
+	{
+		it = FindItemByClassname("weapon_hyperblaster"); //KA edit
+		it_ent = G_Spawn();// KA edit
+		it_ent->classname = it->classname;
+		SpawnItem(it_ent, it);
+		VectorSet(it_ent->s.origin, self->s.origin[0], self->s.origin[1], self->s.origin[2]);
+		gi.linkentity(it_ent);
+	}
 // check for gib
 	if (self->health <= self->gib_health)
 	{

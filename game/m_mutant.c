@@ -27,8 +27,10 @@ mutant
 
 #include "g_local.h"
 #include "m_mutant.h"
+#include "m_parasite.h"
 
-
+static int sound_suck;
+static int sound_impact;
 static int	sound_swing;
 static int	sound_hit;
 static int	sound_hit2;
@@ -42,10 +44,13 @@ static int	sound_step1;
 static int	sound_step2;
 static int	sound_step3;
 static int	sound_thud;
+static int	sound_launch;
+static int	sound_reelin;
 
 //
 // SOUNDS
 //
+
 
 void mutant_step (edict_t *self)
 {
@@ -283,15 +288,30 @@ void mutant_check_refire (edict_t *self)
 		self->monsterinfo.nextframe = FRAME_attack09;
 }
 
+
+
+
+
 mframe_t mutant_frames_attack [] =
 {
-	ai_charge,	0,	NULL,
-	ai_charge,	0,	NULL,
-	ai_charge,	0,	mutant_hit_left,
-	ai_charge,	0,	NULL,
-	ai_charge,	0,	NULL,
-	ai_charge,	0,	mutant_hit_right,
-	ai_charge,	0,	mutant_check_refire
+	ai_charge, 0,	parasite_launch,
+	ai_charge, 0,	NULL,
+	ai_charge, 15,	parasite_drain_attack,			// Target hits
+	ai_charge, 0,	parasite_drain_attack,			// drain
+	ai_charge, 0,	parasite_drain_attack,			// drain
+	ai_charge, 0,	parasite_drain_attack,			// drain
+	ai_charge, 0,	parasite_drain_attack,			// drain
+	ai_charge, -2,  parasite_drain_attack,			// drain
+	ai_charge, -2,	parasite_drain_attack,			// drain
+	ai_charge, -3,	parasite_drain_attack,			// drain
+	ai_charge, -2,	parasite_drain_attack,			// drain
+	ai_charge, 0,	parasite_drain_attack,			// drain
+	ai_charge, -1,  parasite_drain_attack,			// drain
+	ai_charge, 0,	parasite_reel_in,				// let go
+	ai_charge, -2,	NULL,
+	ai_charge, -2,	NULL,
+	ai_charge, -3,	NULL,
+	ai_charge, 0,	NULL
 };
 mmove_t mutant_move_attack = {FRAME_attack09, FRAME_attack15, mutant_frames_attack, mutant_run};
 
@@ -629,6 +649,10 @@ void SP_monster_mutant (edict_t *self)
 	sound_step2 = gi.soundindex ("mutant/step2.wav");
 	sound_step3 = gi.soundindex ("mutant/step3.wav");
 	sound_thud = gi.soundindex ("mutant/thud1.wav");
+	sound_impact = gi.soundindex("parasite/paratck2.wav");
+	sound_suck = gi.soundindex("parasite/paratck3.wav");
+	sound_launch = gi.soundindex("parasite/paratck1.wav");
+	sound_reelin = gi.soundindex("parasite/paratck4.wav");
 	
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "g_local.h"
 
 
+
 /*
 =================
 check_dodge
@@ -303,90 +304,90 @@ fire_blaster
 Fires a single blaster bolt.  Used by the blaster and hyper blaster.
 =================
 */
-void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+void rocket_touch(edict_t* ent, edict_t* other, cplane_t* plane, csurface_t* surf)
 {
-	int		mod;
+	vec3_t		origin;
+	int			n;
 
-	if (other == self->owner)
+	if (other == ent->owner)
 		return;
 
 	if (surf && (surf->flags & SURF_SKY))
 	{
-		G_FreeEdict (self);
+		G_FreeEdict(ent);
 		return;
 	}
 
-	if (self->owner->client)
-		PlayerNoise(self->owner, self->s.origin, PNOISE_IMPACT);
+	if (ent->owner->client)
+		PlayerNoise(ent->owner, ent->s.origin, PNOISE_IMPACT);
+
+	// calculate position for the explosion entity
+	VectorMA(ent->s.origin, -0.02, ent->velocity, origin);
 
 	if (other->takedamage)
 	{
-		if (self->spawnflags & 1)
-			mod = MOD_HYPERBLASTER;
-		else
-			mod = MOD_BLASTER;
-		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
+		T_Damage(other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_ROCKET);
 	}
 	else
 	{
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLASTER);
-		gi.WritePosition (self->s.origin);
-		if (!plane)
-			gi.WriteDir (vec3_origin);
-		else
-			gi.WriteDir (plane->normal);
-		gi.multicast (self->s.origin, MULTICAST_PVS);
+		// don't throw any debris in net games
+		if (!deathmatch->value && !coop->value)
+		{
+			if ((surf) && !(surf->flags & (SURF_WARP | SURF_TRANS33 | SURF_TRANS66 | SURF_FLOWING)))
+			{
+				n = rand() % 5;
+				while (n--)
+					ThrowDebris(ent, "models/objects/debris2/tris.md2", 2, ent->s.origin);
+			}
+		}
 	}
 
-	G_FreeEdict (self);
+	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_R_SPLASH);
+
+	gi.WriteByte(svc_temp_entity);
+	if (ent->waterlevel)
+		gi.WriteByte(TE_ROCKET_EXPLOSION_WATER);
+	else
+		gi.WriteByte(TE_ROCKET_EXPLOSION);
+	gi.WritePosition(origin);
+	gi.multicast(ent->s.origin, MULTICAST_PHS);
+
+	G_FreeEdict(ent);
 }
 
 void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, qboolean hyper)
 {
-	edict_t	*bolt;
-	trace_t	tr;
+	edict_t* rocket;
 
-	VectorNormalize (dir);
-
-	bolt = G_Spawn();
-	bolt->svflags = SVF_DEADMONSTER;
-	// yes, I know it looks weird that projectiles are deadmonsters
-	// what this means is that when prediction is used against the object
-	// (blaster/hyperblaster shots), the player won't be solid clipped against
-	// the object.  Right now trying to run into a firing hyperblaster
-	// is very jerky since you are predicted 'against' the shots.
-	VectorCopy (start, bolt->s.origin);
-	VectorCopy (start, bolt->s.old_origin);
-	vectoangles (dir, bolt->s.angles);
-	VectorScale (dir, speed, bolt->velocity);
-	bolt->movetype = MOVETYPE_FLYMISSILE;
-	bolt->clipmask = MASK_SHOT;
-	bolt->solid = SOLID_BBOX;
-	bolt->s.effects |= effect;
-	VectorClear (bolt->mins);
-	VectorClear (bolt->maxs);
-	bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
-	bolt->s.sound = gi.soundindex ("misc/lasfly.wav");
-	bolt->owner = self;
-	bolt->touch = blaster_touch;
-	bolt->nextthink = level.time + 2;
-	bolt->think = G_FreeEdict;
-	bolt->dmg = damage;
-	bolt->classname = "bolt";
-	if (hyper)
-		bolt->spawnflags = 1;
-	gi.linkentity (bolt);
+	rocket = G_Spawn();
+	VectorCopy(start, rocket->s.origin);
+	VectorCopy(dir, rocket->movedir);
+	vectoangles(dir, rocket->s.angles);
+	VectorScale(dir, speed, rocket->velocity);
+	rocket->movetype = MOVETYPE_FLYMISSILE;
+	rocket->clipmask = MASK_SHOT;
+	rocket->solid = SOLID_BBOX;
+	rocket->s.effects |= EF_ROCKET;
+	VectorClear(rocket->mins);
+	VectorClear(rocket->maxs);
+	rocket->s.modelindex = gi.modelindex("models/objects/rocket/tris.md2");
+	rocket->owner = self;
+	rocket->touch = rocket_touch;
+	rocket->nextthink = level.time + 8000 / speed;
+	rocket->think = G_FreeEdict;
+	rocket->dmg = 100;
+	rocket->radius_dmg = 100;
+	rocket->dmg_radius = 2000;
+	rocket->s.sound = gi.soundindex("weapons/rockfly.wav");
+	rocket->classname = "rocket";
 
 	if (self->client)
-		check_dodge (self, bolt->s.origin, dir, speed);
+		check_dodge(self, rocket->s.origin, dir, speed);
 
-	tr = gi.trace (self->s.origin, NULL, NULL, bolt->s.origin, bolt, MASK_SHOT);
-	if (tr.fraction < 1.0)
-	{
-		VectorMA (bolt->s.origin, -10, dir, bolt->s.origin);
-		bolt->touch (bolt, tr.ent, NULL, NULL);
-	}
+	gi.linkentity(rocket);
+
+	if (self->client)
+		check_dodge (self, rocket->s.origin, dir, speed);
 }	
 
 
@@ -566,56 +567,7 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 fire_rocket
 =================
 */
-void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-	vec3_t		origin;
-	int			n;
 
-	if (other == ent->owner)
-		return;
-
-	if (surf && (surf->flags & SURF_SKY))
-	{
-		G_FreeEdict (ent);
-		return;
-	}
-
-	if (ent->owner->client)
-		PlayerNoise(ent->owner, ent->s.origin, PNOISE_IMPACT);
-
-	// calculate position for the explosion entity
-	VectorMA (ent->s.origin, -0.02, ent->velocity, origin);
-
-	if (other->takedamage)
-	{
-		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_ROCKET);
-	}
-	else
-	{
-		// don't throw any debris in net games
-		if (!deathmatch->value && !coop->value)
-		{
-			if ((surf) && !(surf->flags & (SURF_WARP|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING)))
-			{
-				n = rand() % 5;
-				while(n--)
-					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin);
-			}
-		}
-	}
-
-	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_R_SPLASH);
-
-	gi.WriteByte (svc_temp_entity);
-	if (ent->waterlevel)
-		gi.WriteByte (TE_ROCKET_EXPLOSION_WATER);
-	else
-		gi.WriteByte (TE_ROCKET_EXPLOSION);
-	gi.WritePosition (origin);
-	gi.multicast (ent->s.origin, MULTICAST_PHS);
-
-	G_FreeEdict (ent);
-}
 
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
 {
@@ -806,8 +758,8 @@ void bfg_think (edict_t *self)
 	edict_t	*ent;
 	edict_t	*ignore;
 	vec3_t	point;
-	vec3_t	dir;
-	vec3_t	start;
+	vec3_t	dir, forward;
+	vec3_t	start, spwn;
 	vec3_t	end;
 	int		dmg;
 	trace_t	tr;
@@ -818,6 +770,13 @@ void bfg_think (edict_t *self)
 		dmg = 10;
 
 	ent = NULL;
+	if (true)
+	{
+		VectorSet(spwn, self->s.origin[0], self->s.origin[1], self->s.origin[2]);
+		AngleVectors(self->s.angles, forward, NULL, NULL);
+		VectorSet(forward, forward[0] * (rand() % 60), forward[1] * (rand() % 60), forward[2] * (rand() % 60));
+		fire_bfg(self, spwn, forward, 500, 400, 1000);
+	}
 	while ((ent = findradius(ent, self->s.origin, 256)) != NULL)
 	{
 		if (ent == self)
@@ -840,9 +799,11 @@ void bfg_think (edict_t *self)
 		ignore = self;
 		VectorCopy (self->s.origin, start);
 		VectorMA (start, 2048, dir, end);
+		
 		while(1)
 		{
 			tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
+
 
 			if (!tr.ent)
 				break;

@@ -365,9 +365,9 @@ void gunner_duck_down (edict_t *self)
 	if (self->monsterinfo.aiflags & AI_DUCKED)
 		return;
 	self->monsterinfo.aiflags |= AI_DUCKED;
-	if (skill->value >= 2)
+	if (skill->value >= 0)
 	{
-		if (random() > 0.5)
+		if (random() > 0)
 			GunnerGrenade (self);
 	}
 
@@ -408,8 +408,6 @@ mmove_t	gunner_move_duck = {FRAME_duck01, FRAME_duck08, gunner_frames_duck, gunn
 
 void gunner_dodge (edict_t *self, edict_t *attacker, float eta)
 {
-	if (random() > 0.25)
-		return;
 
 	if (!self->enemy)
 		self->enemy = attacker;
@@ -483,26 +481,26 @@ mframe_t gunner_frames_attack_chain [] =
 	ai_charge, 0, NULL,
 	ai_charge, 0, NULL,
 	*/
-	ai_charge, 0, gunner_opengun,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade
 };
 mmove_t gunner_move_attack_chain = {FRAME_attak209, FRAME_attak215, gunner_frames_attack_chain, gunner_fire_chain};
 
 mframe_t gunner_frames_fire_chain [] =
 {
-	ai_charge,   0, GunnerFire,
-	ai_charge,   0, GunnerFire,
-	ai_charge,   0, GunnerFire,
-	ai_charge,   0, GunnerFire,
-	ai_charge,   0, GunnerFire,
-	ai_charge,   0, GunnerFire,
-	ai_charge,   0, GunnerFire,
-	ai_charge,   0, GunnerFire
+	ai_charge,   0, GunnerGrenade,
+	ai_charge,   0, GunnerGrenade,
+	ai_charge,   0, GunnerGrenade,
+	ai_charge,   0, GunnerGrenade,
+	ai_charge,   0, GunnerGrenade,
+	ai_charge,   0, GunnerGrenade,
+	ai_charge,   0, GunnerGrenade,
+	ai_charge,   0, GunnerGrenade
 };
 mmove_t gunner_move_fire_chain = {FRAME_attak216, FRAME_attak223, gunner_frames_fire_chain, gunner_refire_chain};
 
@@ -520,27 +518,27 @@ mmove_t gunner_move_endfire_chain = {FRAME_attak224, FRAME_attak230, gunner_fram
 
 mframe_t gunner_frames_attack_grenade [] =
 {
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
 	ai_charge, 0, GunnerGrenade,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
 	ai_charge, 0, GunnerGrenade,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
 	ai_charge, 0, GunnerGrenade,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
 	ai_charge, 0, GunnerGrenade,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade,
+	ai_charge, 0, GunnerGrenade
 };
 mmove_t gunner_move_attack_grenade = {FRAME_attak101, FRAME_attak121, gunner_frames_attack_grenade, gunner_run};
 

@@ -753,6 +753,9 @@ mmove_t	tank_move_death = {FRAME_death101, FRAME_death132, tank_frames_death1, t
 void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
+	vec3_t dir;
+	VectorSubtract(inflictor->s.origin, self->s.origin, dir);
+	fire_bfg(self, self->s.origin, dir, 500, 400, 1000);
 
 // check for gib
 	if (self->health <= self->gib_health)

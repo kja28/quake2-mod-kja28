@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include "g_local.h"
 #include "m_player.h"
+#include "p_class.h"  // KA edit
 
 void ClientUserinfoChanged (edict_t *ent, char *userinfo);
 
@@ -1570,9 +1571,10 @@ usually be a couple times for each server frame.
 void ClientThink (edict_t *ent, usercmd_t *ucmd)
 {
 	gclient_t	*client;
-	edict_t	*other;
+	edict_t	*other, *target;
 	int		i, j;
 	pmove_t	pm;
+
 
 	level.current_entity = ent;
 	client = ent->client;
@@ -1586,6 +1588,16 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			level.exitintermission = true;
 		return;
 	}
+
+	//KA edit: Constantly check for what class the player is
+	CheckClass(ent);
+
+	// KA edit: Check if jug invincibility is actiive
+	IsInvincible(ent);
+
+	//KA edit: Checkj if ability was activated
+	IsControl(ent);
+	
 
 	pm_passent = ent;
 

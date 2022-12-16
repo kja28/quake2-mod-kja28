@@ -39,7 +39,7 @@ static void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed)
 	// easy mode only ducks one quarter the time
 	if (skill->value == 0)
 	{
-		if (random() > 0.25)
+		if (random() > 0)
 			return;
 	}
 	VectorMA (start, 8192, dir, end);
