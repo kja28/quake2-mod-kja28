@@ -28,7 +28,7 @@ chaingun = has to charge up before it can fire (Vladof)
 
 Just need to install all the files here and but the entire boderquake file into quake 2's files (the same folder or directory with baseq2) 
 you can make a shortcut that links to the borderquake folder (included in files) or take the game x86.dll and put it into base q2 but the shortcut link is recommended.
-
+If you want you could also download all the files and open up the solution and compile the game folder to get the dll.
 
 
 
